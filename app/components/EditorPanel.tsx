@@ -1,16 +1,15 @@
 "use client";
 import { useResume } from "./ResumeContext";
 import { useState } from "react";
+import { ReorderableList } from "./ReorderableList";
 
 export default function EditorPanel() {
   const { resume, setResume } = useResume();
-  const [selectedSection, setSelectedSection] = useState<string>("summary");
 
   const updateField = (field: string, value: any) => {
     setResume({ ...resume, [field]: value });
   };
 
-  // Helper add/remove functions
   const addItem = (field: string, newItem: any) => {
     updateField(field, [...(resume[field] || []), newItem]);
   };
@@ -21,7 +20,6 @@ export default function EditorPanel() {
     updateField(field, updated);
   };
 
-  // Predefined adders
   const addSkillCategory = () => addItem("skills", { category: "New Category", items: [] });
   const addExperience = () =>
     addItem("experience", {
@@ -43,7 +41,7 @@ export default function EditorPanel() {
     <div className="p-5 bg-white overflow-y-auto text-gray-900 leading-relaxed">
       <h2 className="text-xl font-bold mb-4 border-b pb-2">Resume Editor</h2>
 
-      {/* Basic Info */}
+      {/* BASIC INFO */}
       <div className="mb-4">
         <label className="font-semibold block text-gray-900">Full Name</label>
         <input
@@ -52,7 +50,7 @@ export default function EditorPanel() {
           onChange={(e) => updateField("name", e.target.value)}
         />
 
-        {/* Phone numbers */}
+        {/* Phone */}
         <label className="font-semibold block mt-3 text-gray-900">Phone</label>
         {resume.phone?.map((phone: string, i: number) => (
           <div key={i} className="relative group mb-2">
@@ -68,7 +66,6 @@ export default function EditorPanel() {
             <button
               onClick={() => removeItem("phone", i)}
               className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              title="Remove phone"
             >
               ✕
             </button>
@@ -81,7 +78,7 @@ export default function EditorPanel() {
           + Add Phone
         </button>
 
-        {/* Emails */}
+        {/* Email */}
         <label className="font-semibold block mt-3 text-gray-900">Email</label>
         {resume.email?.map((email: string, i: number) => (
           <div key={i} className="relative group mb-2">
@@ -96,8 +93,7 @@ export default function EditorPanel() {
             />
             <button
               onClick={() => removeItem("email", i)}
-              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              title="Remove email"
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
             >
               ✕
             </button>
@@ -125,8 +121,7 @@ export default function EditorPanel() {
             />
             <button
               onClick={() => removeItem("linkedin", i)}
-              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              title="Remove LinkedIn link"
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
             >
               ✕
             </button>
@@ -139,24 +134,23 @@ export default function EditorPanel() {
           + Add LinkedIn
         </button>
 
-        {/* Portfolio Links */}
+        {/* Portfolio */}
         <label className="font-semibold block mt-3 text-gray-900">Portfolio Links</label>
         {resume.portfolio?.map((p: string, i: number) => (
           <div key={i} className="relative group mb-2">
             <input
-              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="https://github.com/username or website"
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={p}
               onChange={(e) => {
-                const newPortfolios = [...resume.portfolio];
-                newPortfolios[i] = e.target.value;
-                updateField("portfolio", newPortfolios);
+                const newP = [...resume.portfolio];
+                newP[i] = e.target.value;
+                updateField("portfolio", newP);
               }}
             />
             <button
               onClick={() => removeItem("portfolio", i)}
-              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              title="Remove portfolio link"
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
             >
               ✕
             </button>
@@ -170,31 +164,35 @@ export default function EditorPanel() {
         </button>
       </div>
 
-      {/* Professional Summary */}
+      {/* PROFESSIONAL SUMMARY */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Professional Summary
       </h3>
-      {resume.summary.map((point: string, i: number) => (
-        <div key={i} className="relative group mb-2">
-          <textarea
-            className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            rows={2}
-            value={point}
-            onChange={(e) => {
-              const newSummary = [...resume.summary];
-              newSummary[i] = e.target.value;
-              updateField("summary", newSummary);
-            }}
-          />
-          <button
-            onClick={() => removeItem("summary", i)}
-            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="Remove summary point"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
+      <ReorderableList
+        items={resume.summary}
+        onReorder={(newSummary) => updateField("summary", newSummary)}
+        renderItem={(point, i) => (
+          <div key={i} className="relative group mb-2">
+            <textarea
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              rows={2}
+              value={point}
+              onChange={(e) => {
+                const newSummary = [...resume.summary];
+                newSummary[i] = e.target.value;
+                updateField("summary", newSummary);
+              }}
+            />
+            <button
+              data-no-drag
+              onClick={() => removeItem("summary", i)}
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+      />
       <button
         onClick={addSummaryPoint}
         className="text-blue-600 font-semibold mb-4 hover:underline"
@@ -202,7 +200,7 @@ export default function EditorPanel() {
         + Add Summary Point
       </button>
 
-      {/* Technical Skills */}
+      {/* TECHNICAL SKILLS */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Technical Skills
       </h3>
@@ -229,8 +227,7 @@ export default function EditorPanel() {
           />
           <button
             onClick={() => removeItem("skills", i)}
-            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="Remove skill category"
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
           >
             ✕
           </button>
@@ -243,7 +240,7 @@ export default function EditorPanel() {
         + Add Skill Category
       </button>
 
-      {/* Certifications */}
+      {/* CERTIFICATIONS */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Certifications
       </h3>
@@ -260,8 +257,7 @@ export default function EditorPanel() {
           />
           <button
             onClick={() => removeItem("certifications", i)}
-            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="Remove certification"
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
           >
             ✕
           </button>
@@ -274,7 +270,7 @@ export default function EditorPanel() {
         + Add Certification
       </button>
 
-      {/* Education */}
+      {/* EDUCATION */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Education
       </h3>
@@ -312,8 +308,7 @@ export default function EditorPanel() {
           />
           <button
             onClick={() => removeItem("education", i)}
-            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="Remove education entry"
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
           >
             ✕
           </button>
@@ -326,7 +321,7 @@ export default function EditorPanel() {
         + Add Education
       </button>
 
-      {/* Experience */}
+      {/* EXPERIENCE */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Experience
       </h3>
@@ -388,8 +383,7 @@ export default function EditorPanel() {
           />
           <button
             onClick={() => removeItem("experience", i)}
-            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="Remove experience entry"
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
           >
             ✕
           </button>

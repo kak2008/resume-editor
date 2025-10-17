@@ -10,44 +10,34 @@ export default function EditorPanel() {
     setResume({ ...resume, [field]: value });
   };
 
-  const addSkillCategory = () => {
-    setResume({
-      ...resume,
-      skills: [...resume.skills, { category: "New Category", items: [] }],
-    });
+  // Helper add/remove functions
+  const addItem = (field: string, newItem: any) => {
+    updateField(field, [...(resume[field] || []), newItem]);
   };
 
-  const addExperience = () => {
-    setResume({
-      ...resume,
-      experience: [
-        ...resume.experience,
-        {
-          client: "New Client",
-          company: "",
-          role: "",
-          duration: "",
-          projectDescription: "",
-          responsibilities: [],
-          environment: "",
-        },
-      ],
-    });
+  const removeItem = (field: string, index: number) => {
+    const updated = [...resume[field]];
+    updated.splice(index, 1);
+    updateField(field, updated);
   };
 
-  const addCertification = () => {
-    setResume({
-      ...resume,
-      certifications: [...resume.certifications, "New Certification"],
+  // Predefined adders
+  const addSkillCategory = () => addItem("skills", { category: "New Category", items: [] });
+  const addExperience = () =>
+    addItem("experience", {
+      client: "New Client",
+      company: "",
+      role: "",
+      duration: "",
+      projectDescription: "",
+      responsibilities: [],
+      environment: "",
     });
-  };
-
-  const addEducation = () => {
-    setResume({
-      ...resume,
-      education: [...resume.education, { degree: "", school: "", year: "" }],
-    });
-  };
+  const addCertification = () => addItem("certifications", "New Certification");
+  const addEducation = () =>
+    addItem("education", { degree: "", school: "", year: "" });
+  const addSummaryPoint = () => addItem("summary", "New summary point...");
+  const addPortfolioLink = () => addItem("portfolio", "https://");
 
   return (
     <div className="p-5 bg-white overflow-y-auto text-gray-900 leading-relaxed">
@@ -62,52 +52,162 @@ export default function EditorPanel() {
           onChange={(e) => updateField("name", e.target.value)}
         />
 
+        {/* Phone numbers */}
         <label className="font-semibold block mt-3 text-gray-900">Phone</label>
-        <input
-          className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={resume.phone}
-          onChange={(e) => updateField("phone", e.target.value)}
-        />
+        {resume.phone?.map((phone: string, i: number) => (
+          <div key={i} className="relative group mb-2">
+            <input
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={phone}
+              onChange={(e) => {
+                const newPhones = [...resume.phone];
+                newPhones[i] = e.target.value;
+                updateField("phone", newPhones);
+              }}
+            />
+            <button
+              onClick={() => removeItem("phone", i)}
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              title="Remove phone"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          className="text-blue-600 font-semibold mb-2 hover:underline"
+          onClick={() => addItem("phone", "")}
+        >
+          + Add Phone
+        </button>
 
+        {/* Emails */}
         <label className="font-semibold block mt-3 text-gray-900">Email</label>
-        <input
-          className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={resume.email}
-          onChange={(e) => updateField("email", e.target.value)}
-        />
+        {resume.email?.map((email: string, i: number) => (
+          <div key={i} className="relative group mb-2">
+            <input
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={email}
+              onChange={(e) => {
+                const newEmails = [...resume.email];
+                newEmails[i] = e.target.value;
+                updateField("email", newEmails);
+              }}
+            />
+            <button
+              onClick={() => removeItem("email", i)}
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              title="Remove email"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          className="text-blue-600 font-semibold mb-2 hover:underline"
+          onClick={() => addItem("email", "")}
+        >
+          + Add Email
+        </button>
 
+        {/* LinkedIn */}
         <label className="font-semibold block mt-3 text-gray-900">LinkedIn</label>
-        <input
-          className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={resume.linkedin}
-          onChange={(e) => updateField("linkedin", e.target.value)}
-        />
+        {resume.linkedin?.map((link: string, i: number) => (
+          <div key={i} className="relative group mb-2">
+            <input
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={link}
+              onChange={(e) => {
+                const newLinks = [...resume.linkedin];
+                newLinks[i] = e.target.value;
+                updateField("linkedin", newLinks);
+              }}
+            />
+            <button
+              onClick={() => removeItem("linkedin", i)}
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              title="Remove LinkedIn link"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          className="text-blue-600 font-semibold mb-2 hover:underline"
+          onClick={() => addItem("linkedin", "")}
+        >
+          + Add LinkedIn
+        </button>
+
+        {/* Portfolio Links */}
+        <label className="font-semibold block mt-3 text-gray-900">Portfolio Links</label>
+        {resume.portfolio?.map((p: string, i: number) => (
+          <div key={i} className="relative group mb-2">
+            <input
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="https://github.com/username or website"
+              value={p}
+              onChange={(e) => {
+                const newPortfolios = [...resume.portfolio];
+                newPortfolios[i] = e.target.value;
+                updateField("portfolio", newPortfolios);
+              }}
+            />
+            <button
+              onClick={() => removeItem("portfolio", i)}
+              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              title="Remove portfolio link"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          className="text-blue-600 font-semibold mb-4 hover:underline"
+          onClick={addPortfolioLink}
+        >
+          + Add Portfolio Link
+        </button>
       </div>
 
-      {/* Summary */}
+      {/* Professional Summary */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Professional Summary
       </h3>
       {resume.summary.map((point: string, i: number) => (
-        <textarea
-          key={i}
-          className="border border-gray-300 p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          rows={2}
-          value={point}
-          onChange={(e) => {
-            const newSummary = [...resume.summary];
-            newSummary[i] = e.target.value;
-            updateField("summary", newSummary);
-          }}
-        />
+        <div key={i} className="relative group mb-2">
+          <textarea
+            className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows={2}
+            value={point}
+            onChange={(e) => {
+              const newSummary = [...resume.summary];
+              newSummary[i] = e.target.value;
+              updateField("summary", newSummary);
+            }}
+          />
+          <button
+            onClick={() => removeItem("summary", i)}
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            title="Remove summary point"
+          >
+            ✕
+          </button>
+        </div>
       ))}
+      <button
+        onClick={addSummaryPoint}
+        className="text-blue-600 font-semibold mb-4 hover:underline"
+      >
+        + Add Summary Point
+      </button>
 
-      {/* Skills */}
+      {/* Technical Skills */}
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Technical Skills
       </h3>
       {resume.skills.map((skillCat: any, i: number) => (
-        <div key={i} className="mb-3 border border-gray-300 p-2 rounded bg-gray-50">
+        <div key={i} className="relative group mb-3 border border-gray-300 p-2 rounded bg-gray-50">
           <input
             className="border border-gray-300 p-1 rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={skillCat.category}
@@ -127,6 +227,13 @@ export default function EditorPanel() {
               updateField("skills", newSkills);
             }}
           />
+          <button
+            onClick={() => removeItem("skills", i)}
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            title="Remove skill category"
+          >
+            ✕
+          </button>
         </div>
       ))}
       <button
@@ -141,16 +248,24 @@ export default function EditorPanel() {
         Certifications
       </h3>
       {resume.certifications.map((cert: string, i: number) => (
-        <input
-          key={i}
-          className="border border-gray-300 p-2 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={cert}
-          onChange={(e) => {
-            const newCerts = [...resume.certifications];
-            newCerts[i] = e.target.value;
-            updateField("certifications", newCerts);
-          }}
-        />
+        <div key={i} className="relative group mb-2">
+          <input
+            className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={cert}
+            onChange={(e) => {
+              const newCerts = [...resume.certifications];
+              newCerts[i] = e.target.value;
+              updateField("certifications", newCerts);
+            }}
+          />
+          <button
+            onClick={() => removeItem("certifications", i)}
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            title="Remove certification"
+          >
+            ✕
+          </button>
+        </div>
       ))}
       <button
         className="text-blue-600 font-semibold mb-4 hover:underline"
@@ -164,7 +279,7 @@ export default function EditorPanel() {
         Education
       </h3>
       {resume.education.map((edu: any, i: number) => (
-        <div key={i} className="mb-3">
+        <div key={i} className="relative group mb-3 border border-gray-300 p-2 rounded">
           <input
             className="border border-gray-300 p-2 w-full mb-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Degree"
@@ -195,6 +310,13 @@ export default function EditorPanel() {
               updateField("education", newEdu);
             }}
           />
+          <button
+            onClick={() => removeItem("education", i)}
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            title="Remove education entry"
+          >
+            ✕
+          </button>
         </div>
       ))}
       <button
@@ -209,7 +331,10 @@ export default function EditorPanel() {
         Experience
       </h3>
       {resume.experience.map((exp: any, i: number) => (
-        <div key={i} className="border border-gray-300 p-2 mb-4 rounded bg-gray-50">
+        <div
+          key={i}
+          className="relative group border border-gray-300 p-2 mb-4 rounded bg-gray-50"
+        >
           <input
             className="border border-gray-300 p-1 w-full mb-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Client"
@@ -261,6 +386,13 @@ export default function EditorPanel() {
               updateField("experience", newExp);
             }}
           />
+          <button
+            onClick={() => removeItem("experience", i)}
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            title="Remove experience entry"
+          >
+            ✕
+          </button>
         </div>
       ))}
       <button

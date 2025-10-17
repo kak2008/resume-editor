@@ -24,9 +24,10 @@ export interface Education {
 
 export interface ResumeData {
   name: string;
-  phone: string;
-  email: string;
-  linkedin: string;
+  phone: string | string[];      // supports both string and array
+  email: string | string[];
+  linkedin: string | string[];
+  portfolio?: string[];          // optional new field
   summary: string[];
   skills: SkillCategory[];
   certifications: string[];
@@ -35,15 +36,16 @@ export interface ResumeData {
 }
 
 const defaultData: ResumeData = {
-  name: "Santhosh Kumar Magendran",
-  phone: "609-332-8966",
-  email: "santhoshmage07@gmail.com",
-  linkedin: "linkedin.com/in/santhoshkumar-magendran-5b794b170",
+  name: "Your Full Name",
+  phone: ["123-456-7890"], // converted to array for consistency
+  email: ["santhoshmage07@gmail.com"],
+  linkedin: ["linkedin.com/in/santhoshkumar-magendran-5b794b170"],
+  portfolio: [""], // new optional array field (starts empty)
   summary: [
     "Senior Data Engineer with 9+ years of experience building and optimizing enterprise-scale, cloud-native data platforms on Google Cloud Platform.",
     "Expert in designing AI-ready data ecosystems using BigQuery, Dataflow, Pub/Sub, Dataproc, and Vertex AI.",
     "Experienced in Lakehouse & Data Mesh architectures, Terraform automation, dbt transformations, and CI/CD pipelines.",
-    "Proven record of improving performance, data quality, and governance for large-scale analytics and ML pipelines."
+    "Proven record of improving performance, data quality, and governance for large-scale analytics and ML pipelines.",
   ],
   skills: [
     {
@@ -69,7 +71,11 @@ const defaultData: ResumeData = {
     "Google Cloud Data Engineering Specialization",
   ],
   education: [
-    { degree: "B.Tech in Information and Technology", school: "RMK Engineering College, India", year: "2016" },
+    {
+      degree: "B.Tech in Information and Technology",
+      school: "RMK Engineering College, India",
+      year: "2016",
+    },
   ],
   experience: [
     {
@@ -84,7 +90,7 @@ const defaultData: ResumeData = {
         "Automated infrastructure provisioning using Terraform.",
         "Integrated dbt with GitHub CI for automated testing and modular pipelines.",
         "Implemented OpenLineage and Great Expectations for observability and data quality.",
-        "Deployed feature pipelines feeding into Vertex AI Feature Store for ML-driven analytics."
+        "Deployed feature pipelines feeding into Vertex AI Feature Store for ML-driven analytics.",
       ],
       environment:
         "GCP (BigQuery, Dataflow, Dataproc), Python, SQL, dbt, Terraform, Great Expectations",
@@ -96,6 +102,13 @@ const ResumeContext = createContext<any>(null);
 
 export const ResumeProvider = ({ children }: { children: ReactNode }) => {
   const [resume, setResume] = useState<ResumeData>(defaultData);
+
+  // ✅ Backward compatibility normalization
+  if (typeof resume.phone === "string") resume.phone = [resume.phone];
+  if (typeof resume.email === "string") resume.email = [resume.email];
+  if (typeof resume.linkedin === "string") resume.linkedin = [resume.linkedin];
+  if (!resume.portfolio) resume.portfolio = [""];
+
   return (
     <ResumeContext.Provider value={{ resume, setResume }}>
       {children}

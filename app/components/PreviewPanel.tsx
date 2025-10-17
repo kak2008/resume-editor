@@ -4,13 +4,100 @@ import { useResume } from "./ResumeContext";
 export default function PreviewPanel() {
   const { resume } = useResume();
 
+  // 🧩 Utility to ensure arrays
+  const ensureArray = (val: any) => {
+    if (!val) return [];
+    return Array.isArray(val) ? val : [val];
+  };
+
+  const phones = ensureArray(resume.phone);
+  const emails = ensureArray(resume.email);
+  const linkedins = ensureArray(resume.linkedin);
+  const portfolios = ensureArray(resume.portfolio);
+
+  // 📞 Format phone numbers
+  const formatPhone = (num: string) => {
+    const digits = num.replace(/\D/g, "");
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    return num; // fallback if non-standard
+  };
+
   return (
-<div className="w-full h-screen overflow-y-auto bg-gray-50 p-10 text-gray-900 font-sans">
+    <div className="w-full h-screen overflow-y-auto bg-gray-50 p-10 text-gray-900 font-sans">
       {/* Header */}
       <div className="text-center border-b pb-3 mb-4">
-        <h1 className="text-3xl font-bold">{resume.name}</h1>
-        <p className="text-sm mt-1">
-          📞 {resume.phone} | ✉️ {resume.email} | 🔗 {resume.linkedin}
+        <h1 className="text-3xl font-bold">
+          {resume.name || "Your Full Name"}
+        </h1>
+
+        <p className="text-sm mt-2 flex flex-wrap justify-center items-center gap-x-2 text-gray-800">
+          {/* Phones */}
+          {phones.length > 0 &&
+            phones
+              .filter((p) => p.trim() !== "")
+              .map((p, i) => (
+                <span key={i}>
+                  📞 {formatPhone(p)}
+                  {i < phones.length - 1 && " | "}
+                </span>
+              ))}
+
+          {/* Emails */}
+          {emails.length > 0 &&
+            emails
+              .filter((e) => e.trim() !== "")
+              .map((e, i) => (
+                <span key={i}>
+                  {phones.length > 0 && i === 0 && " | "}✉️ {e}
+                  {i < emails.length - 1 && " | "}
+                </span>
+              ))}
+
+          {/* LinkedIn */}
+          {linkedins.length > 0 &&
+            linkedins
+              .filter((l) => l.trim() !== "")
+              .map((l, i) => (
+                <span key={i}>
+                  {(phones.length > 0 || emails.length > 0) && i === 0 && " | "}
+                  🔗{" "}
+                  <a
+                    href={l.startsWith("http") ? l : `https://${l}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 hover:underline"
+                  >
+                    {l.replace(/^https?:\/\//, "")}
+                  </a>
+                  {i < linkedins.length - 1 && " | "}
+                </span>
+              ))}
+
+          {/* Portfolio */}
+          {portfolios.length > 0 &&
+            portfolios
+              .filter((p) => p.trim() !== "")
+              .map((p, i) => (
+                <span key={i}>
+                  {(phones.length > 0 ||
+                    emails.length > 0 ||
+                    linkedins.length > 0) &&
+                    i === 0 &&
+                    " | "}
+                  💼{" "}
+                  <a
+                    href={p.startsWith("http") ? p : `https://${p}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 hover:underline"
+                  >
+                    {p.replace(/^https?:\/\//, "")}
+                  </a>
+                  {i < portfolios.length - 1 && " | "}
+                </span>
+              ))}
         </p>
       </div>
 
@@ -59,8 +146,8 @@ export default function PreviewPanel() {
           <h2 className="text-xl font-semibold border-b mb-2 pb-1">Education</h2>
           {resume.education.map((edu, i) => (
             <p key={i} className="text-sm mb-1">
-              <span className="font-semibold">{edu.degree}</span>, {edu.school}{" "}
-              | Graduated: {edu.year}
+              <span className="font-semibold">{edu.degree}</span>, {edu.school} |{" "}
+              Graduated: {edu.year}
             </p>
           ))}
         </section>

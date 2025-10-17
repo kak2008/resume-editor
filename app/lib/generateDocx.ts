@@ -5,7 +5,46 @@ import { ResumeData } from "../components/ResumeContext";
 export async function generateDocx(resume: ResumeData) {
   const children: Paragraph[] = [];
 
-  // Header
+  // 🧩 Utility to safely normalize arrays
+  const ensureArray = (val: any) => {
+    if (!val) return [];
+    return Array.isArray(val) ? val : [val];
+  };
+
+  const phones = ensureArray(resume.phone);
+  const emails = ensureArray(resume.email);
+  const linkedins = ensureArray(resume.linkedin);
+  const portfolios = ensureArray((resume as any).portfolio); // for new field
+
+  // 📞 Format phone numbers
+  const formatPhone = (num: string) => {
+    const digits = num.replace(/\D/g, "");
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    return num;
+  };
+
+  // 🧩 Combine contact info in one line
+  const contactParts: string[] = [];
+  if (phones.length > 0) contactParts.push(phones.map(formatPhone).join(" | "));
+  if (emails.length > 0) contactParts.push(emails.join(" | "));
+  if (linkedins.length > 0)
+    contactParts.push(
+      linkedins
+        .map((l) => (l.startsWith("http") ? l : `https://${l}`))
+        .join(" | ")
+    );
+  if (portfolios.length > 0)
+    contactParts.push(
+      portfolios
+        .map((p) => (p.startsWith("http") ? p : `https://${p}`))
+        .join(" | ")
+    );
+
+  const contactLine = contactParts.join(" | ");
+
+  // 🧩 Header
   children.push(
     new Paragraph({
       children: [
@@ -22,7 +61,9 @@ export async function generateDocx(resume: ResumeData) {
     new Paragraph({
       children: [
         new TextRun({
-          text: `${resume.phone || ""} | ${resume.email || ""} | ${resume.linkedin || ""}`,
+          text:
+            contactLine ||
+            `${resume.phone || ""} | ${resume.email || ""} | ${resume.linkedin || ""}`,
           font: "Calibri",
           size: 22, // ≈11pt
         }),
@@ -32,7 +73,7 @@ export async function generateDocx(resume: ResumeData) {
     })
   );
 
-  // Professional Summary
+  // 🧩 Professional Summary
   if (resume.summary?.length) {
     children.push(
       new Paragraph({
@@ -57,7 +98,7 @@ export async function generateDocx(resume: ResumeData) {
     );
   }
 
-  // Technical Skills
+  // 🧩 Technical Skills
   if (resume.skills?.length) {
     children.push(
       new Paragraph({
@@ -88,7 +129,7 @@ export async function generateDocx(resume: ResumeData) {
     });
   }
 
-  // Certifications
+  // 🧩 Certifications
   if (resume.certifications?.length) {
     children.push(
       new Paragraph({
@@ -113,7 +154,7 @@ export async function generateDocx(resume: ResumeData) {
     );
   }
 
-  // Education
+  // 🧩 Education
   if (resume.education?.length) {
     children.push(
       new Paragraph({
@@ -138,7 +179,7 @@ export async function generateDocx(resume: ResumeData) {
     );
   }
 
-  // Experience
+  // 🧩 Experience
   if (resume.experience?.length) {
     children.push(
       new Paragraph({
@@ -213,7 +254,7 @@ export async function generateDocx(resume: ResumeData) {
     });
   }
 
-  // Build final doc
+  // 🧩 Build final document
   const doc = new Document({
     sections: [
       {

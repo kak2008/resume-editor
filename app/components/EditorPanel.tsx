@@ -168,13 +168,26 @@ export default function EditorPanel() {
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Professional Summary
       </h3>
+
       <ReorderableList
         items={resume.summary}
         onReorder={(newSummary) => updateField("summary", newSummary)}
         renderItem={(point, i) => (
-          <div key={i} className="relative group mb-2">
+          <div
+            key={i}
+            className="relative flex items-center group mb-2 gap-2"
+          >
+            {/* Drag Handle */}
+            <span
+              className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+              title="Drag to reorder"
+            >
+              ⠿
+            </span>
+
+            {/* Summary Text */}
             <textarea
-              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="flex-1 border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               rows={2}
               value={point}
               onChange={(e) => {
@@ -183,16 +196,19 @@ export default function EditorPanel() {
                 updateField("summary", newSummary);
               }}
             />
+
+            {/* Delete Button */}
             <button
               data-no-drag
               onClick={() => removeItem("summary", i)}
-              className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
+              className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             >
               ✕
             </button>
           </div>
         )}
       />
+
       <button
         onClick={addSummaryPoint}
         className="text-blue-600 font-semibold mb-4 hover:underline"
@@ -325,11 +341,13 @@ export default function EditorPanel() {
       <h3 className="text-lg font-semibold mt-6 mb-2 text-gray-900">
         Experience
       </h3>
+
       {resume.experience.map((exp: any, i: number) => (
         <div
           key={i}
-          className="relative group border border-gray-300 p-2 mb-4 rounded bg-gray-50"
+          className="relative group border border-gray-300 p-3 mb-4 rounded bg-gray-50"
         >
+          {/* Basic fields */}
           <input
             className="border border-gray-300 p-1 w-full mb-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Client"
@@ -361,7 +379,7 @@ export default function EditorPanel() {
             }}
           />
           <input
-            className="border border-gray-300 p-1 w-full mb-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 p-1 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Duration"
             value={exp.duration}
             onChange={(e) => {
@@ -370,8 +388,10 @@ export default function EditorPanel() {
               updateField("experience", newExp);
             }}
           />
+
+          {/* Project Description */}
           <textarea
-            className="border border-gray-300 p-1 w-full mb-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 p-1 w-full mb-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={3}
             placeholder="Project Description"
             value={exp.projectDescription}
@@ -381,20 +401,102 @@ export default function EditorPanel() {
               updateField("experience", newExp);
             }}
           />
+
+          {/* RESPONSIBILITIES */}
+          <h4 className="font-semibold text-gray-800 mb-1">Responsibilities</h4>
+          <ReorderableList
+            items={exp.responsibilities || []}
+            onReorder={(newOrder) => {
+              const newExp = [...resume.experience];
+              newExp[i].responsibilities = newOrder;
+              updateField("experience", newExp);
+            }}
+            renderItem={(res: string, j: number) => (
+              <div
+                key={j}
+                className="relative flex items-center group mb-2 gap-2"
+              >
+                {/* Drag Handle */}
+                <span
+                  className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+                  title="Drag to reorder"
+                >
+                  ⠿
+                </span>
+
+                {/* Responsibility Input */}
+                <input
+                  className="flex-1 border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder="Add responsibility..."
+                  value={res}
+                  onChange={(e) => {
+                    const newExp = [...resume.experience];
+                    newExp[i].responsibilities[j] = e.target.value;
+                    updateField("experience", newExp);
+                  }}
+                />
+
+                {/* Delete Responsibility */}
+                <button
+                  data-no-drag
+                  onClick={() => {
+                    const newExp = [...resume.experience];
+                    newExp[i].responsibilities.splice(j, 1);
+                    updateField("experience", newExp);
+                  }}
+                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          />
+
+          {/* Add Responsibility Button */}
           <button
+            onClick={() => {
+              const newExp = [...resume.experience];
+              newExp[i].responsibilities.push("New responsibility...");
+              updateField("experience", newExp);
+            }}
+            className="text-blue-600 font-semibold mb-3 hover:underline"
+          >
+            + Add Responsibility
+          </button>
+
+          {/* Environment */}
+          <h4 className="font-semibold text-gray-800 mb-1">Environment</h4>
+          <textarea
+            className="border border-gray-300 p-1 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows={2}
+            placeholder="e.g., Swift, SwiftUI, Combine, AWS, GraphQL"
+            value={exp.environment || ""}
+            onChange={(e) => {
+              const newExp = [...resume.experience];
+              newExp[i].environment = e.target.value;
+              updateField("experience", newExp);
+            }}
+          />
+
+          {/* Delete Experience */}
+          <button
+            data-no-drag
             onClick={() => removeItem("experience", i)}
-            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
+            className="absolute top-1 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           >
             ✕
           </button>
         </div>
       ))}
+
+      {/* Add Experience */}
       <button
         className="text-blue-600 font-semibold hover:underline"
         onClick={addExperience}
       >
         + Add Experience
       </button>
+
     </div>
   );
 }

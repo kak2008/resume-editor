@@ -21,26 +21,34 @@ interface Props {
   renderItem: (item: any, index: number) => JSX.Element;
 }
 
+/**
+ * A reusable reorderable list using @dnd-kit
+ * Fully supports nested drag contexts (e.g., summary + responsibilities)
+ */
 export function ReorderableList({ items, onReorder, renderItem }: Props) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5, // must move 5px before starting drag
-      },
+      activationConstraint: { distance: 5 },
     })
   );
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    if (active.id !== over?.id) {
-      const oldIndex = parseInt(active.id);
-      const newIndex = parseInt(over.id);
-      onReorder(arrayMove(items, oldIndex, newIndex));
-    }
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = parseInt(active.id);
+    const newIndex = parseInt(over.id);
+    onReorder(arrayMove(items, oldIndex, newIndex));
   };
 
+  // ✅ Separate DndContext for every ReorderableList instance
+  // ensures Responsibilities lists work independently
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
       <SortableContext
         items={items.map((_, i) => i.toString())}
         strategy={verticalListSortingStrategy}
@@ -56,24 +64,23 @@ export function ReorderableList({ items, onReorder, renderItem }: Props) {
 }
 
 function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    touchAction: "none", // fixes nested drag interference
   };
 
   const handlePointerDown = (event: React.PointerEvent) => {
-    // Allow clicks on X buttons or other non-draggable elements
-    if ((event.target as HTMLElement).closest("[data-no-drag]")) {
-      event.stopPropagation(); // prevent drag start
+    const target = event.target as HTMLElement;
+    // prevent dragging when clicking delete buttons etc.
+    if (target.closest("[data-no-drag]")) {
+      event.stopPropagation();
       return;
     }
-
-    // Otherwise, let drag events go through normally
-    if (listeners.onPointerDown) {
-      listeners.onPointerDown(event);
-    }
+    listeners.onPointerDown?.(event);
   };
 
   return (
@@ -81,8 +88,8 @@ function SortableItem({ id, children }: { id: string; children: React.ReactNode 
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="cursor-grab active:cursor-grabbing"
       onPointerDown={handlePointerDown}
+      className="cursor-grab active:cursor-grabbing select-none"
     >
       {children}
     </div>
